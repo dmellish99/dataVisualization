@@ -5,4 +5,4 @@ For UPM Data Visualization
 Dakota Mellish
 Rodrigo Castanon
 Ignacio Domingeuz
-Alex De Santos
+Alejandro De Santos
