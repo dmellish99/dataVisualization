@@ -1,14 +1,9 @@
-if (!require("shiny")) install.packages("shiny")
-if (!require("shinyWidgets")) install.packages("shinyWidgets")
-if (!require("bslib")) install.packages("bslib")
-if (!require("shinyBS")) install.packages("shinyBS")
-if (!require("ggplot2")) install.packages("ggplot2")
-
 library(shiny)
 library(shinyWidgets)
+library(ggplot2)
+library(dplyr)
 library(bslib)
 library(shinyBS)
-library(ggplot2)
 
 ui <- fluidPage(
   theme = bs_theme(
