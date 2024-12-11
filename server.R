@@ -148,18 +148,85 @@ server <- function(input, output, session) {
       )
   })
   
-  # Idiom 3 Placeholder 
+  # Idiom 3 Placeholder
+  
+  # Load data
+  features <- read.csv('csv/audiofeatures.csv')
+  trackinfo <- read.csv('csv/track_info.csv')
+  artists <- read.csv('csv/artists.csv')
+  
+  # Merge and process data
+  artists$track_id <- artists$song_id
+  artists_track <- merge(x = artists, y = data, by = "track_id", all.x = TRUE)
+  artists_track$genre <- as.factor(artists_track$genre)
+  
+  # Unique genres for dropdown menu
+  cols <- colnames(artists_track)[7:12]
+  
+  col_group_by=colnames(artists_track)[6]
+  
+  
+  dataset <- artists_track[,c(6:12,14,15)]
+  
+  
   output$plot_idiom_3 <- renderPlot({
-    ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
-      geom_point() +
-      labs(title = "Idiom 3 Placeholder")
+    ggparcoord(dataset,
+               columns =2:9, groupColumn = 1, order = "anyClass",
+               #scale="center",
+               showPoints = TRUE, 
+               title = "Standardize and center variables",
+               alphaLines = 0.3
+    ) + 
+      scale_color_viridis(discrete=TRUE) +
+      theme_ipsum()+
+      theme(
+        legend.position="none",
+        plot.title = element_text(size=13)
+      ) +
+      xlab("Metrics")    
   })
   
+  # Load data
+  features_hist <- read.csv('csv/audiofeatures.csv')
+  trackinfo_hist <- read.csv('csv/track_info.csv')
+  artists_hist <- read.csv('csv/artists.csv')
+  
+  # Merge and process data
+  artists_hist$track_id <- artists$song_id
+  artists_hist_track <- merge(x = artists, y = data, by = "track_id", all.x = TRUE)
+  artists_hist_track$genre <- as.factor(artists_track$genre)
+  dataset_hist <- artists_hist_track
+  
   # Idiom 4 Placeholder (Cambiar por el código del idiom)
+  # Filter dataset by selected genres
+  req(input$genres)  # Ensure input$genres is not NULL
+  
+  dataset_hist <- dataset_hist[dataset_hist$genre %in% input$genres, ]
+  
+  # Load data
+  data <- read.csv('audiofeatures.csv')
+  trackinfo <- read.csv('track_info.csv')
+  artists <- read.csv('artists.csv')
+  
+  # Merge and process data
+  artists$track_id <- artists$song_id
+  artists_track <- merge(x = artists, y = data, by = "track_id", all.x = TRUE)
+  artists_track$genre <- as.factor(artists_track$genre)
+  data <- artists_track
+  
+  
+  
   output$plot_idiom_4 <- renderPlot({
-    ggplot(mtcars, aes(x = hp, y = qsec)) +
-      geom_line() +
-      labs(title = "Idiom 4 Placeholder")
+
+    
+    # Create histogram with colors for each genre
+    ggplot(dataset_hist, aes(x = BPM, fill = genre)) +
+      geom_histogram(bins = 20, position = "identity", alpha = 0.6) +
+      labs(title = "Histogram of BPM by Genre",
+           x = "BPM",
+           y = "Frequency") +
+      scale_fill_brewer(palette = "Set3") +  # Use a color palette for genres
+      theme_minimal()
   })
   
   
