@@ -4,6 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(bslib)
 library(shinyBS)
+library (ggstream)
 
 server <- function(input, output, session) {
   
@@ -122,7 +123,7 @@ server <- function(input, output, session) {
     req(filtered_data())
     
     ggplot(filtered_data(), aes(x = release_year, y = avg_popularity, fill = genre)) +
-      geom_area(alpha = 0.7, position = "stack") +
+      geom_stream(type = "ridge", alpha = 0.7) +
       labs(
         title = "Streamgraph of Genre Popularity",
         x = "Year",
