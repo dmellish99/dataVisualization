@@ -6,7 +6,7 @@ library(GGally)
 library(viridis)
 
 # Load data
-data <- read.csv('audiofeatures.csv')
+features <- read.csv('audiofeatures.csv')
 trackinfo <- read.csv('track_info.csv')
 artists <- read.csv('artists.csv')
 
@@ -21,12 +21,12 @@ cols <- colnames(artists_track)[7:12]
 col_group_by=colnames(artists_track)[6]
 
 
-data <- artists_track[,c(6:12,14,15)]
+dataset <- artists_track[,c(6:12,14,15)]
 
 
 
 # Unique genres for dropdown menu
-genres <- unique(data$genre) 
+genres <- unique(dataset$genre) 
 
 
 

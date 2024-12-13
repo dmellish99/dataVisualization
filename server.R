@@ -153,75 +153,74 @@ server <- function(input, output, session) {
   
   # Load data
   features <- read.csv('csv/audiofeatures.csv')
-  trackinfo <- read.csv('csv/track_info.csv')
   artists <- read.csv('csv/artists.csv')
+  trackinfo<-read.csv('csv/track_info.csv')
+  # Merge and process 
+  artists$track_id<-artists$song_id
   
-  # Merge and process data
-  artists$track_id <- artists$song_id
-  artists_track <- merge(x = artists, y = data, by = "track_id", all.x = TRUE)
-  artists_track$genre <- as.factor(artists_track$genre)
+  trackinfo<-merge(x = trackinfo, y = artists, by = "track_id", all.x = TRUE)
   
-  # Unique genres for dropdown menu
-  cols <- colnames(artists_track)[7:12]
-  
-  col_group_by=colnames(artists_track)[6]
+  trackinfo<-merge(x = trackinfo, y = features, by = "track_id", all.x = TRUE)
   
   
-  dataset <- artists_track[,c(6:12,14,15)]
+  trackinfo$artist_song=paste(trackinfo$artist,'-',trackinfo$track_name)
   
+  cols_to_keep<-c('artist_song','genre','happiness','acousticness','danceability','energy','speechiness','instrumentalness','liveness')
+  dataset<-trackinfo[,(names(trackinfo) %in% cols_to_keep)]
   
-  output$plot_idiom_3 <- renderPlot({
-    ggparcoord(dataset,
-               columns =2:9, groupColumn = 1, order = "anyClass",
-               #scale="center",
-               showPoints = TRUE, 
-               title = "Standardize and center variables",
-               alphaLines = 0.3
-    ) + 
-      scale_color_viridis(discrete=TRUE) +
-      theme_ipsum()+
-      theme(
-        legend.position="none",
-        plot.title = element_text(size=13)
-      ) +
-      xlab("Metrics")    
+  dataset$genre<-as.factor(dataset$genre)
+  
+
+  
+  par_coords_data <- reactive({
+    req(input$genres)  # Ensure input$genres is not NULL
+    dataset[dataset$genre %in% input$genres, ]
   })
   
+  # Render the plot
+  output$plot_idiom_3 <- renderPlot({
+    ggparcoord(
+      data = par_coords_data(),
+      columns = 2:8,            # Adjust columns to match your numeric variables
+      groupColumn = 1,         # Adjust for grouping (e.g., genres or artists)
+      showPoints = TRUE,
+      title = "Song Metrics by Genre"
+    ) +
+      scale_color_viridis_d() + # Better color scale for discrete data
+      theme_minimal() +
+      labs(x = "Metrics", y = "Values", color = "Genre")
+  })
+
+  
+  
+  
+  # Idiom 4 Placeholder (Cambiar por el código del idiom)
+  # Filter dataset by selected genres
   # Load data
   features_hist <- read.csv('csv/audiofeatures.csv')
   trackinfo_hist <- read.csv('csv/track_info.csv')
   artists_hist <- read.csv('csv/artists.csv')
-  
+
   # Merge and process data
-  artists_hist$track_id <- artists$song_id
-  artists_hist_track <- merge(x = artists, y = data, by = "track_id", all.x = TRUE)
-  artists_hist_track$genre <- as.factor(artists_track$genre)
+  artists_hist$track_id <- artists_hist$song_id
+  artists_hist_track <- merge(x = artists_hist, y = features_hist, by = "track_id", all.x = TRUE)
+  artists_hist_track$genre <- as.factor(artists_hist_track$genre)
   dataset_hist <- artists_hist_track
-  
-  # Idiom 4 Placeholder (Cambiar por el código del idiom)
-  # Filter dataset by selected genres
-  req(input$genres)  # Ensure input$genres is not NULL
-  
-  dataset_hist <- dataset_hist[dataset_hist$genre %in% input$genres, ]
-  
-  # Load data
-  data <- read.csv('audiofeatures.csv')
-  trackinfo <- read.csv('track_info.csv')
-  artists <- read.csv('artists.csv')
-  
-  # Merge and process data
-  artists$track_id <- artists$song_id
-  artists_track <- merge(x = artists, y = data, by = "track_id", all.x = TRUE)
-  artists_track$genre <- as.factor(artists_track$genre)
-  data <- artists_track
+
+
   
   
+  hist_data <- reactive({
+    req(input$genres_)  # Ensure input$genres_ is not NULL
+    dataset_hist[dataset_hist$genre %in% input$genres_, ]
+  })
   
   output$plot_idiom_4 <- renderPlot({
+  # Filter dataset by selected genres
 
     
     # Create histogram with colors for each genre
-    ggplot(dataset_hist, aes(x = BPM, fill = genre)) +
+    ggplot(hist_data(), aes(x = BPM, fill = genre)) +
       geom_histogram(bins = 20, position = "identity", alpha = 0.6) +
       labs(title = "Histogram of BPM by Genre",
            x = "BPM",

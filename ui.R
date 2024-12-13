@@ -78,22 +78,35 @@ ui <- fluidPage(
     ),
     
     # Idiom 3 (Cambiar por el código del idiom)
-    tabPanel("Idiom 3",
+    tabPanel("Song Metrics",
              sidebarLayout(
                sidebarPanel(
-                 helpText("Agregar controles para el tercer idiom aquí.")
+                 selectInput(
+                   inputId = "genres",
+                   label = "Select Genre(s):",
+                   choices = unique(dataset$genre),  # Replace with your genre column
+                   selected = unique(dataset$genre)[1],  # Preselect the first genre
+                   multiple = TRUE
+                 )
                ),
+               
                mainPanel(
-                 plotOutput("plot_idiom_3") 
+                 plotOutput("plot_idiom_3")
                )
              )
     ),
     
     # Idiom 4 (Cambiar por el código del idiom)
-    tabPanel("Idiom 4",
+    tabPanel("BPM by Genre",
              sidebarLayout(
                sidebarPanel(
-                 helpText("Agregar controles para el cuarto idiom aquí.")
+                 selectInput(
+                   inputId = "genres_",
+                   label = "Select Genre(s):",
+                   choices = unique(dataset_hist$genre),  # Replace with your genre column
+                   selected = unique(dataset_hist$genre)[1],  # Preselect the first genre
+                   multiple = TRUE
+                 )
                ),
                mainPanel(
                  plotOutput("plot_idiom_4")  
