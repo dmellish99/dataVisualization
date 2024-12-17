@@ -5,6 +5,7 @@ library(dplyr)
 library(bslib)
 library(shinyBS)
 library (ggstream)
+library(GGaly)
 
 
 

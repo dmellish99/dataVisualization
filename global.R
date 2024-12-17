@@ -4,6 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(bslib)
 library(shinyBS)
+library(GGally)
 
 tracks <- read.csv("csv/track_info.csv")
 sections <- read.csv("csv/sections.csv")
