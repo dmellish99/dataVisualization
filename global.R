@@ -16,9 +16,9 @@ track_sections <- merge(
 )
 
 track_sections_heatmap <- track_sections %>%
-  select(track_name, start, duration, loudness, key) %>%
-  mutate(end = start + duration) %>%
-  mutate(key = factor(key))
+  dplyr::select(track_name, start, duration, loudness, key) %>%
+  dplyr::mutate(end = start + duration) %>%
+  dplyr::mutate(key = factor(key))
 
 
 features_hist <- read.csv('csv/audiofeatures.csv')

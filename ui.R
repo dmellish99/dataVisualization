@@ -78,22 +78,59 @@ ui <- fluidPage(
     ),
     
     # Idiom 3 (Cambiar por el código del idiom)
-    tabPanel("Song Metrics",
-             sidebarLayout(
-               sidebarPanel(
-                 selectInput(
-                   inputId = "genres",
-                   label = "Select Genre(s):",
-                   choices = unique(dataset$genre),  # Replace with your genre column
-                   selected = unique(dataset$genre)[1],  # Preselect the first genre
-                   multiple = TRUE
-                 )
-               ),
-               
-               mainPanel(
-                 plotOutput("plot_idiom_3")
-               )
-             )
+    tabPanel(
+      "Song Metrics",
+      sidebarLayout(
+        sidebarPanel(
+          # Radio buttons to select filter type
+          radioButtons(
+            inputId = "filter_type",
+            label = "Filter By:",
+            choices = list("Genre" = "genre", "Individual Song" = "artist_song"),
+            selected = "genre"
+          ),
+          
+          # Conditional panel for genre selection
+          conditionalPanel(
+            condition = "input.filter_type == 'genre'",
+            selectInput(
+              inputId = "genres",
+              label = "Select Genre(s):",
+              choices = unique(dataset$genre),  # Replace with your genre column
+              selected = unique(dataset$genre)[1],  # Preselect the first genre
+              multiple = TRUE
+            )
+          ),
+          
+          # Conditional panel for song selection
+          conditionalPanel(
+            condition = "input.filter_type == 'artist_song'",
+            selectInput(
+              inputId = "artist_songs",
+              label = "Select Song(s):",
+              choices = unique(dataset$artist_song),  # Replace with your song column
+              selected = unique(dataset$artist_song)[1],  # Preselect the first song
+              multiple = TRUE
+            )
+          ),
+          
+          # Add selectizeInput to reorder columns
+          selectizeInput(
+            inputId = "column_order",
+            label = "Order Columns:",
+            choices = c("happiness", "acousticness", "danceability", "energy", "speechiness", "instrumentalness", "liveness"),
+            selected = c("happiness", "acousticness", "danceability", "energy", "speechiness", "instrumentalness", "liveness"),
+            multiple = TRUE,
+            options = list(plugins = list("drag_drop"))
+          ),
+          # Reset Button
+          actionButton(inputId = "reset_button", label = "Reset to Default")
+        ),
+        
+        mainPanel(
+          plotOutput("plot_idiom_3")
+        )
+      )
     ),
     
     # Idiom 4 (Cambiar por el código del idiom)

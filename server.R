@@ -175,25 +175,72 @@ server <- function(input, output, session) {
   
 
   
-  par_coords_data <- reactive({
-    req(input$genres)  # Ensure input$genres is not NULL
-    dataset[dataset$genre %in% input$genres, ]
-  })
-  
-  # Render the plot
-  output$plot_idiom_3 <- renderPlot({
-    ggparcoord(
-      data = par_coords_data(),
-      columns = 2:8,            # Adjust columns to match your numeric variables
-      groupColumn = 1,         # Adjust for grouping (e.g., genres or artists)
-      showPoints = TRUE,
-      title = "Song Metrics by Genre"
-    ) +
-      scale_color_viridis_d() + # Better color scale for discrete data
-      theme_minimal() +
-      labs(x = "Metrics", y = "Values", color = "Genre")
-  })
+  # Reactive dataset filtered by genre and artist
+  # Reactive dataset based on filter type
 
+    # Reactive expression to filter data (same as before)
+    par_coords_data <- reactive({
+      if (input$filter_type == "genre") {
+        req(input$genres)
+        dataset %>%
+          dplyr::select(genre, happiness, acousticness, danceability, energy, speechiness, instrumentalness, liveness) %>%
+          dplyr::filter(genre %in% input$genres)
+      } else if (input$filter_type == "artist_song") {
+        req(input$artist_songs)
+        dataset %>%
+          dplyr::select(artist_song, happiness, acousticness, danceability, energy, speechiness, instrumentalness, liveness) %>%
+          dplyr::filter(artist_song %in% input$artist_songs)
+      }
+    })
+    
+    # Render the plot
+    output$plot_idiom_3 <- renderPlot({
+      req(par_coords_data())
+      req(input$column_order)
+
+      # Validate column order
+      valid_columns <- names(par_coords_data())
+      user_columns <- input$column_order
+      if (is.null(user_columns) || length(user_columns) == 0) {
+        user_columns <- valid_columns[-1]  # Default to all columns except grouping column
+      }
+      
+      if (!all(user_columns %in% valid_columns)) {
+        stop("Invalid columns in input$column_order")
+      }
+      
+      # Dynamically match columns to user-defined order
+      column_indices <- match(user_columns, valid_columns)
+      
+      ggparcoord(
+        data = par_coords_data(),
+        columns = column_indices,
+        groupColumn = 1,  # First column for grouping
+        showPoints = TRUE,
+        scale = "globalminmax",
+        title = "Song Metrics by Genre or Song"
+      ) +
+        scale_color_viridis_d() +
+        theme_minimal() +
+        labs(x = "Metrics", y = "Values", color = "Grouping")
+    })
+    
+    # Reset button functionality
+    observeEvent(input$reset_button, {
+      updateRadioButtons(session, "filter_type", selected = "genre")  # Reset filter type to genre
+      
+      # Reset genre or song input depending on filter type
+      updateSelectInput(session, "genres", selected = unique(dataset$genre)[1])  # Reset genre to the first value
+      updateSelectInput(session, "artist_songs", selected = unique(dataset$artist_song)[1])  # Reset song to the first value
+      
+      # Reset column order input
+      updateSelectizeInput(
+        session,
+        inputId = "column_order",
+        selected = c("happiness", "acousticness", "danceability", "energy", "speechiness", "instrumentalness", "liveness")
+      )
+    })
+  
   
   
   
