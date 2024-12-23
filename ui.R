@@ -16,7 +16,7 @@ ui <- fluidPage(
   
   tabsetPanel(
     #Heatmap
-    tabPanel("Heatmap", 
+    tabPanel(titlePanel("Heatmap"), 
              sidebarLayout(
                sidebarPanel(
                  selectInput("track", "Select a Track:", choices = unique(track_sections$track_name)),
@@ -39,7 +39,7 @@ ui <- fluidPage(
     ),
     
     # Streamgraph
-    tabPanel("Streamgraph", 
+    tabPanel(titlePanel("Streamgraph"), 
              sidebarLayout(
                sidebarPanel(
                  wellPanel(
@@ -79,7 +79,7 @@ ui <- fluidPage(
     
     # Idiom 3 (Cambiar por el código del idiom)
     tabPanel(
-      "Song Metrics",
+      titlePanel("Song Metrics"),
       sidebarLayout(
         sidebarPanel(
           # Radio buttons to select filter type
@@ -134,19 +134,42 @@ ui <- fluidPage(
     ),
     
     # Idiom 4 (Cambiar por el código del idiom)
-    tabPanel("BPM by Genre",
+    tabPanel(titlePanel("Bubble Chart"),
              sidebarLayout(
                sidebarPanel(
+                 sliderInput(
+                   "bpm_range",
+                   "Filter by BPM:",
+                   min = min(data$BPM, na.rm = TRUE),
+                   max = max(data$BPM, na.rm = TRUE),
+                   value = c(min(data$BPM, na.rm = TRUE), max(data$BPM, na.rm = TRUE))
+                 ),
+                 sliderInput(
+                   "energy_range",
+                   "Filter by Energy:",
+                   min = min(data$energy, na.rm = TRUE),
+                   max = max(data$energy, na.rm = TRUE),
+                   value = c(min(data$energy, na.rm = TRUE), max(data$energy, na.rm = TRUE))
+                 ),
+                 sliderInput("popularity_range", 
+                             "Select Popularity Range", min = min(data$popularity),
+                             max = max(data$popularity), value = c(min(data$popularity),
+                                                                   max(data$popularity))
+                 ),
                  selectInput(
-                   inputId = "genres_",
-                   label = "Select Genre(s):",
-                   choices = unique(dataset_hist$genre),  # Replace with your genre column
-                   selected = unique(dataset_hist$genre)[1],  # Preselect the first genre
-                   multiple = TRUE
+                   "color_by",
+                   "Color bubbles by:",
+                   choices = c(
+                     "Key Type" = "key_type",
+                     "Duration Category" = "duration_category",
+                     "Genre" = "genre",
+                     "Explicit" = "is_explicit"
+                   ),
+                   selected = "key_type"
                  )
                ),
                mainPanel(
-                 plotOutput("plot_idiom_4")  
+                 plotOutput("bubblePlot")
                )
              )
     )

@@ -51,3 +51,4 @@ cols_to_keep<-c('artist_song','genre','happiness','acousticness','danceability',
 dataset<-trackinfo[,(names(trackinfo) %in% cols_to_keep)]
 
 dataset$genre<-as.factor(dataset$genre)
+

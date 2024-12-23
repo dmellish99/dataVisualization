@@ -244,40 +244,80 @@ server <- function(input, output, session) {
   
   
   
-  # Idiom 4 Placeholder (Cambiar por el código del idiom)
-  # Filter dataset by selected genres
-  # Load data
-  # features_hist <- read.csv('csv/audiofeatures.csv')
-  # trackinfo_hist <- read.csv('csv/track_info.csv')
-  # artists_hist <- read.csv('csv/artists.csv')
-
-  # # Merge and process data
-  # artists_hist$track_id <- artists_hist$song_id
-  # artists_hist_track <- merge(x = artists_hist, y = features_hist, by = "track_id", all.x = TRUE)
-  # artists_hist_track$genre <- as.factor(artists_hist_track$genre)
-  # dataset_hist <- artists_hist_track
+  # Idiom 4 Bubble Plot (BPM vs Energy vs Popularity)
 
 
-  
-  
-  hist_data <- reactive({
-    req(input$genres_)  # Ensure input$genres_ is not NULL
-    dataset_hist[dataset_hist$genre %in% input$genres_, ]
-  })
-  
-  output$plot_idiom_4 <- renderPlot({
-  # Filter dataset by selected genres
-
+    data <- read.csv('csv/audiofeatures.csv')
+    trackinfo <- read.csv('csv/track_info.csv')
+    artists <- read.csv('csv/artists.csv')
     
-    # Create histogram with colors for each genre
-    ggplot(hist_data(), aes(x = BPM, fill = genre)) +
-      geom_histogram(bins = 20, position = "identity", alpha = 0.6) +
-      labs(title = "Histogram of BPM by Genre",
-           x = "BPM",
-           y = "Frequency") +
-      scale_fill_brewer(palette = "Set3") +  # Use a color palette for genres
-      theme_minimal()
-  })
+    data_track <- merge(x = data, y = trackinfo, by = "track_id", all.x = TRUE) %>%
+      select(-popularity.y) %>%
+      rename(popularity = popularity.x)
+    
+    # Luego, fusionar con artists
+    artists$track_id <- artists$song_id
+    data_final <- merge(x = artists, y = data_track, by = "track_id", all.x = TRUE)
+    
+    # Convertir género a factor
+    data_final$genre <- as.factor(data_final$genre)
+    
+    # Actualizar el objeto data
+    data <- data_final
+    
+    
+    # Crear nuevas columnas de tipo de clave y categoría de duración
+    data <- data %>%
+      mutate(
+        key_type = case_when(
+          grepl("Major", key, ignore.case = TRUE) ~ "Major",
+          grepl("Minor", key, ignore.case = TRUE) ~ "Minor",
+          TRUE ~ "Unknown"
+        ),
+        key_type = factor(key_type, levels = c("Major", "Minor", "Unknown")),
+        duration_minutes = sapply(strsplit(duration, ":"), function(x) {
+          as.numeric(x[1]) + as.numeric(x[2]) / 60 + as.numeric(x[3]) / 3600
+        }),
+        duration_category = case_when(
+          duration_minutes >= 1 & duration_minutes < 2 ~ "1-2",
+          duration_minutes >= 2 & duration_minutes < 3 ~ "2-3",
+          duration_minutes >= 3 & duration_minutes < 4 ~ "3-4",
+          duration_minutes >= 4 ~ "4+"
+        ),
+        duration_category = factor(duration_category, levels = c("1-2", "2-3", "3-4", "4+"))
+      )
+  
+    filtered_data <- reactive({
+      data %>%
+        filter(
+          BPM >= input$bpm_range[1] & BPM <= input$bpm_range[2],
+          energy >= input$energy_range[1] & energy <= input$energy_range[2],
+          popularity >= input$popularity_range[1] & popularity <= input$popularity_range[2]
+        )
+    })
+    
+    output$bubblePlot <- renderPlot({
+      ggplot(filtered_data(), aes(
+        x = BPM,
+        y = energy,
+        size = popularity,
+        color = .data[[input$color_by]] 
+      )) +
+        geom_point(alpha = 0.6) +
+        scale_size_continuous(name = "Popularity", range = c(2, 15)) +
+        scale_color_viridis_d(name = input$color_by) + 
+        labs(
+          title = "Bubble Chart: Energy vs BPM vs Popularity",
+          x = "Beats Per Minute (BPM)",
+          y = "Energy"
+        ) +
+        theme_minimal() +
+        guides(
+          color = guide_legend(override.aes = list(size = 5)) 
+          
+        )
+    })
   
   
 }
+
