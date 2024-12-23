@@ -13,7 +13,7 @@ server <- function(input, output, session) {
   
   output$track_selection <- renderUI({
     if (input$compare_tracks) {
-      selectizeInput("multi_tracks", "Select Tracks for Comparison:", 
+      selectizeInput("multi_tracks", "Select Tracks for Displayment:", 
                      choices = unique(track_sections$track_name), 
                      selected = unique(track_sections$track_name)[1:2], 
                      multiple = TRUE,
