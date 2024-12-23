@@ -4,6 +4,10 @@ library(ggplot2)
 library(dplyr)
 library(bslib)
 library(shinyBS)
+library (ggstream)
+library(GGally)
+
+
 
 server <- function(input, output, session) {
   
@@ -122,7 +126,7 @@ server <- function(input, output, session) {
     req(filtered_data())
     
     ggplot(filtered_data(), aes(x = release_year, y = avg_popularity, fill = genre)) +
-      geom_area(alpha = 0.7, position = "stack") +
+      geom_stream(type = "ridge", alpha = 0.7) +
       labs(
         title = "Streamgraph of Genre Popularity",
         x = "Year",
@@ -148,18 +152,131 @@ server <- function(input, output, session) {
       )
   })
   
-  # Idiom 3 Placeholder 
-  output$plot_idiom_3 <- renderPlot({
-    ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
-      geom_point() +
-      labs(title = "Idiom 3 Placeholder")
-  })
+  # Idiom 3 Placeholder
+  
+  # # Load data
+  # features <- read.csv('csv/audiofeatures.csv')
+  # artists <- read.csv('csv/artists.csv')
+  # trackinfo<-read.csv('csv/track_info.csv')
+  # # Merge and process 
+  # artists$track_id<-artists$song_id
+  
+  # trackinfo<-merge(x = trackinfo, y = artists, by = "track_id", all.x = TRUE)
+  
+  # trackinfo<-merge(x = trackinfo, y = features, by = "track_id", all.x = TRUE)
+  
+  
+  # trackinfo$artist_song=paste(trackinfo$artist,'-',trackinfo$track_name)
+  
+  # cols_to_keep<-c('artist_song','genre','happiness','acousticness','danceability','energy','speechiness','instrumentalness','liveness')
+  # dataset<-trackinfo[,(names(trackinfo) %in% cols_to_keep)]
+  
+  # dataset$genre<-as.factor(dataset$genre)
+  
+
+  
+  # Reactive dataset filtered by genre and artist
+  # Reactive dataset based on filter type
+
+    # Reactive expression to filter data (same as before)
+    par_coords_data <- reactive({
+      if (input$filter_type == "genre") {
+        req(input$genres)
+        dataset %>%
+          dplyr::select(genre, happiness, acousticness, danceability, energy, speechiness, instrumentalness, liveness) %>%
+          dplyr::filter(genre %in% input$genres)
+      } else if (input$filter_type == "artist_song") {
+        req(input$artist_songs)
+        dataset %>%
+          dplyr::select(artist_song, happiness, acousticness, danceability, energy, speechiness, instrumentalness, liveness) %>%
+          dplyr::filter(artist_song %in% input$artist_songs)
+      }
+    })
+    
+    # Render the plot
+    output$plot_idiom_3 <- renderPlot({
+      req(par_coords_data())
+      req(input$column_order)
+
+      # Validate column order
+      valid_columns <- names(par_coords_data())
+      user_columns <- input$column_order
+      if (is.null(user_columns) || length(user_columns) == 0) {
+        user_columns <- valid_columns[-1]  # Default to all columns except grouping column
+      }
+      
+      if (!all(user_columns %in% valid_columns)) {
+        stop("Invalid columns in input$column_order")
+      }
+      
+      # Dynamically match columns to user-defined order
+      column_indices <- match(user_columns, valid_columns)
+      
+      ggparcoord(
+        data = par_coords_data(),
+        columns = column_indices,
+        groupColumn = 1,  # First column for grouping
+        showPoints = TRUE,
+        scale = "globalminmax",
+        title = "Song Metrics by Genre or Song"
+      ) +
+        scale_color_viridis_d() +
+        theme_minimal() +
+        labs(x = "Metrics", y = "Values", color = "Grouping")
+    })
+    
+    # Reset button functionality
+    observeEvent(input$reset_button, {
+      updateRadioButtons(session, "filter_type", selected = "genre")  # Reset filter type to genre
+      
+      # Reset genre or song input depending on filter type
+      updateSelectInput(session, "genres", selected = unique(dataset$genre)[1])  # Reset genre to the first value
+      updateSelectInput(session, "artist_songs", selected = unique(dataset$artist_song)[1])  # Reset song to the first value
+      
+      # Reset column order input
+      updateSelectizeInput(
+        session,
+        inputId = "column_order",
+        selected = c("happiness", "acousticness", "danceability", "energy", "speechiness", "instrumentalness", "liveness")
+      )
+    })
+  
+  
+  
   
   # Idiom 4 Placeholder (Cambiar por el código del idiom)
+  # Filter dataset by selected genres
+  # Load data
+  # features_hist <- read.csv('csv/audiofeatures.csv')
+  # trackinfo_hist <- read.csv('csv/track_info.csv')
+  # artists_hist <- read.csv('csv/artists.csv')
+
+  # # Merge and process data
+  # artists_hist$track_id <- artists_hist$song_id
+  # artists_hist_track <- merge(x = artists_hist, y = features_hist, by = "track_id", all.x = TRUE)
+  # artists_hist_track$genre <- as.factor(artists_hist_track$genre)
+  # dataset_hist <- artists_hist_track
+
+
+  
+  
+  hist_data <- reactive({
+    req(input$genres_)  # Ensure input$genres_ is not NULL
+    dataset_hist[dataset_hist$genre %in% input$genres_, ]
+  })
+  
   output$plot_idiom_4 <- renderPlot({
-    ggplot(mtcars, aes(x = hp, y = qsec)) +
-      geom_line() +
-      labs(title = "Idiom 4 Placeholder")
+  # Filter dataset by selected genres
+
+    
+    # Create histogram with colors for each genre
+    ggplot(hist_data(), aes(x = BPM, fill = genre)) +
+      geom_histogram(bins = 20, position = "identity", alpha = 0.6) +
+      labs(title = "Histogram of BPM by Genre",
+           x = "BPM",
+           y = "Frequency") +
+      scale_fill_brewer(palette = "Set3") +  # Use a color palette for genres
+      theme_minimal()
   })
   
   
