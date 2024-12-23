@@ -20,7 +20,7 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(
                  selectInput("track", "Select a Track:", choices = unique(track_sections$track_name)),
-                 checkboxInput("compare_tracks", "Compare Multiple Tracks", value = FALSE),
+                 checkboxInput("compare_tracks", "Display Multiple Tracks Loudness", value = FALSE),
                  uiOutput("track_selection"),  # Dynamic UI for multiple track selection
                  
                  sliderInput("loudnessRange", "Select Loudness Range:",
