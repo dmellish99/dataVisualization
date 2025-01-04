@@ -1,8 +1,7 @@
 For UPM Data Visualization 
 
-**Group Members
-**
+**Group Members**
 Dakota Mellish
-Rodrigo Castanon
+Rodrigo Castañón
 Ignacio Dominguez
 Alejandro De Santos

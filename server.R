@@ -6,11 +6,12 @@ library(bslib)
 library(shinyBS)
 library (ggstream)
 library(GGally)
-
+library(viridis)
 
 
 server <- function(input, output, session) {
   
+  # Idiom 1
   output$track_selection <- renderUI({
     if (input$compare_tracks) {
       selectizeInput("multi_tracks", "Select Tracks for Displayment:", 
@@ -68,8 +69,12 @@ server <- function(input, output, session) {
   )
   
   # Idiom 2
+  
+  # Load and prepare data for streamgraph
   data <- read.csv("csv/all_genres_popularity_over_time.csv")
   years <- sort(unique(data$release_year))
+  
+  # Update UI inputs for selecting genres and years
   observe({
     updateSelectizeInput(
       session,
@@ -94,6 +99,7 @@ server <- function(input, output, session) {
     )
   })
   
+  # Ensure "start_year" stays valid when "end_year" changes
   observeEvent(input$end_year, {
     req(input$end_year) 
     
@@ -108,6 +114,7 @@ server <- function(input, output, session) {
     )
   })
   
+  # Reactive function to filter data for streamgraph
   filtered_data <- reactive({
     req(input$selected_genres, input$start_year, input$end_year)
     
@@ -122,6 +129,7 @@ server <- function(input, output, session) {
       arrange(release_year)
   })
   
+  # Render streamgraph plot
   output$streamgraph_plot <- renderPlot({
     req(filtered_data())
     
@@ -245,50 +253,9 @@ server <- function(input, output, session) {
   
   
   # Idiom 4 Bubble Plot (BPM vs Energy vs Popularity)
-
-
-    data <- read.csv('csv/audiofeatures.csv')
-    trackinfo <- read.csv('csv/track_info.csv')
-    artists <- read.csv('csv/artists.csv')
-    
-    data_track <- merge(x = data, y = trackinfo, by = "track_id", all.x = TRUE) %>%
-      select(-popularity.y) %>%
-      rename(popularity = popularity.x)
-    
-    # Luego, fusionar con artists
-    artists$track_id <- artists$song_id
-    data_final <- merge(x = artists, y = data_track, by = "track_id", all.x = TRUE)
-    
-    # Convertir género a factor
-    data_final$genre <- as.factor(data_final$genre)
-    
-    # Actualizar el objeto data
-    data <- data_final
-    
-    
-    # Crear nuevas columnas de tipo de clave y categoría de duración
-    data <- data %>%
-      mutate(
-        key_type = case_when(
-          grepl("Major", key, ignore.case = TRUE) ~ "Major",
-          grepl("Minor", key, ignore.case = TRUE) ~ "Minor",
-          TRUE ~ "Unknown"
-        ),
-        key_type = factor(key_type, levels = c("Major", "Minor", "Unknown")),
-        duration_minutes = sapply(strsplit(duration, ":"), function(x) {
-          as.numeric(x[1]) + as.numeric(x[2]) / 60 + as.numeric(x[3]) / 3600
-        }),
-        duration_category = case_when(
-          duration_minutes >= 1 & duration_minutes < 2 ~ "1-2",
-          duration_minutes >= 2 & duration_minutes < 3 ~ "2-3",
-          duration_minutes >= 3 & duration_minutes < 4 ~ "3-4",
-          duration_minutes >= 4 ~ "4+"
-        ),
-        duration_category = factor(duration_category, levels = c("1-2", "2-3", "3-4", "4+"))
-      )
-  
-    filtered_data <- reactive({
-      data %>%
+    bubble_filtered_data <- reactive({
+      req(bubble_data)
+      bubble_data %>%
         filter(
           BPM >= input$bpm_range[1] & BPM <= input$bpm_range[2],
           energy >= input$energy_range[1] & energy <= input$energy_range[2],
@@ -297,7 +264,7 @@ server <- function(input, output, session) {
     })
     
     output$bubblePlot <- renderPlot({
-      ggplot(filtered_data(), aes(
+      ggplot(bubble_filtered_data(), aes(
         x = BPM,
         y = energy,
         size = popularity,
@@ -317,7 +284,4 @@ server <- function(input, output, session) {
           
         )
     })
-  
-  
 }
-

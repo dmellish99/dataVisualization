@@ -15,69 +15,71 @@ ui <- fluidPage(
   titlePanel("Idioms of Song Analysis"),
   
   tabsetPanel(
-    #Heatmap
+    # Idiom 1
     tabPanel(titlePanel("Heatmap"), 
-             sidebarLayout(
-               sidebarPanel(
-                 selectInput("track", "Select a Track:", choices = unique(track_sections$track_name)),
-                 checkboxInput("compare_tracks", "Display Multiple Tracks Loudness", value = FALSE),
-                 uiOutput("track_selection"),  # Dynamic UI for multiple track selection
-                 
-                 sliderInput("loudnessRange", "Select Loudness Range:",
-                             min = min(track_sections$loudness, na.rm = TRUE),
-                             max = max(track_sections$loudness, na.rm = TRUE),
-                             value = c(min(track_sections$loudness, na.rm = TRUE), max(track_sections$loudness, na.rm = TRUE))
-                 ),
-                 
-                 downloadButton("downloadPlot", "Download Heatmap")
-               ),
-               
-               mainPanel(
-                 plotOutput("heatmap")
-               )
-             )
+    sidebarLayout(
+      sidebarPanel(
+        selectInput("track", "Select a Track:", choices = unique(track_sections$track_name)),
+        checkboxInput("compare_tracks", "Display Multiple Tracks Loudness", value = FALSE),
+        uiOutput("track_selection"),  # Dynamic UI for multiple track selection
+            sliderInput("loudnessRange", "Select Loudness Range:",
+                  min = min(track_sections$loudness, na.rm = TRUE),
+                  max = max(track_sections$loudness, na.rm = TRUE),
+                  value = c(min(track_sections$loudness, na.rm = TRUE), max(track_sections$loudness, na.rm = TRUE))
+            ),
+            downloadButton("downloadPlot", "Download Heatmap")
+        ),
+        mainPanel(
+          plotOutput("heatmap")
+        )
+      )
     ),
     
-    # Streamgraph
+    # Idiom 2
     tabPanel(titlePanel("Streamgraph"), 
-             sidebarLayout(
-               sidebarPanel(
-                 wellPanel(
-                   h4("Controls"),
-                   selectizeInput(
-                     inputId = "selected_genres",
-                     label = "Select Genres to Display:",
-                     choices = NULL,
-                     selected = NULL,
-                     multiple = TRUE,
-                     options = list(
-                       create = FALSE,
-                       plugins = list('remove_button') 
-                     )
-                   ),
-                 selectInput(
-                   inputId = "start_year",
-                   label = "Select Start Year:",
-                   choices = NULL,
-                   selected = NULL
-                 ),
-                 selectInput(
-                   inputId = "end_year",
-                   label = "Select End Year:",
-                   choices = NULL,  
-                   selected = NULL
-                 )
-               )
-               ),
-               mainPanel(
-                 fluidRow(
-                   column(12, align = "center", plotOutput("streamgraph_plot", height = "500px"))
-                 )
-               )
-             )
+      sidebarLayout(
+        # Sidebar panel containing controls
+        sidebarPanel(
+          wellPanel(
+            h4("Controls"),
+              # Input to select genres to display in the streamgraph
+              selectizeInput(
+                inputId = "selected_genres",
+                label = "Select Genres to Display:",
+                choices = NULL,
+                selected = NULL,
+                multiple = TRUE,
+                options = list(
+                create = FALSE,
+                plugins = list('remove_button') 
+              )
+            ),
+          # Input to select the starting year
+          selectInput(
+            inputId = "start_year",
+            label = "Select Start Year:",
+            choices = NULL,
+            selected = NULL
+          ),
+          # Input to select the ending year
+          selectInput(
+            inputId = "end_year",
+            label = "Select End Year:",
+            choices = NULL,  
+            selected = NULL
+          )
+        )
+        ),
+        # Main panel to display the streamgraph
+        mainPanel(
+          fluidRow(
+            column(12, align = "center", plotOutput("streamgraph_plot", height = "500px"))
+          )
+        )
+      )
     ),
     
-    # Idiom 3 (Cambiar por el código del idiom)
+    # Idiom 3
     tabPanel(
       titlePanel("Song Metrics"),
       sidebarLayout(
@@ -133,45 +135,44 @@ ui <- fluidPage(
       )
     ),
     
-    # Idiom 4 (Cambiar por el código del idiom)
+    # Idiom 4
     tabPanel(titlePanel("Bubble Chart"),
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput(
-                   "bpm_range",
-                   "Filter by BPM:",
-                   min = min(data$BPM, na.rm = TRUE),
-                   max = max(data$BPM, na.rm = TRUE),
-                   value = c(min(data$BPM, na.rm = TRUE), max(data$BPM, na.rm = TRUE))
-                 ),
-                 sliderInput(
-                   "energy_range",
-                   "Filter by Energy:",
-                   min = min(data$energy, na.rm = TRUE),
-                   max = max(data$energy, na.rm = TRUE),
-                   value = c(min(data$energy, na.rm = TRUE), max(data$energy, na.rm = TRUE))
-                 ),
-                 sliderInput("popularity_range", 
-                             "Select Popularity Range", min = min(data$popularity),
-                             max = max(data$popularity), value = c(min(data$popularity),
-                                                                   max(data$popularity))
-                 ),
-                 selectInput(
-                   "color_by",
-                   "Color bubbles by:",
-                   choices = c(
-                     "Key Type" = "key_type",
-                     "Duration Category" = "duration_category",
-                     "Genre" = "genre",
-                     "Explicit" = "is_explicit"
-                   ),
-                   selected = "key_type"
-                 )
-               ),
-               mainPanel(
-                 plotOutput("bubblePlot")
-               )
-             )
+      sidebarLayout(
+        sidebarPanel(
+          sliderInput(
+            "bpm_range",
+            "Filter by BPM:",
+            min = min(data$BPM, na.rm = TRUE),
+            max = max(data$BPM, na.rm = TRUE),
+            value = c(min(data$BPM, na.rm = TRUE), max(data$BPM, na.rm = TRUE))
+          ),
+          sliderInput(
+            "energy_range",
+            "Filter by Energy:",
+            min = min(data$energy, na.rm = TRUE),
+            max = max(data$energy, na.rm = TRUE),
+            value = c(min(data$energy, na.rm = TRUE), max(data$energy, na.rm = TRUE))
+          ),
+          sliderInput("popularity_range", 
+            "Select Popularity Range", min = min(data$popularity),
+            max = max(data$popularity), value = c(min(data$popularity), max(data$popularity))
+          ),
+          selectInput(
+            "color_by",
+            "Color bubbles by:",
+            choices = c(
+              "Key Type" = "key_type",
+              "Duration Category" = "duration_category",
+              "Genre" = "genre",
+              "Explicit" = "is_explicit"
+            ),
+            selected = "key_type"
+          )
+        ),
+        mainPanel(
+          plotOutput("bubblePlot")
+        )
+      )
     )
   )
 )

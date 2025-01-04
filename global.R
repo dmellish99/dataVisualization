@@ -52,3 +52,43 @@ dataset<-trackinfo[,(names(trackinfo) %in% cols_to_keep)]
 
 dataset$genre<-as.factor(dataset$genre)
 
+
+#Idiom 4
+
+bubble_data <- read.csv('csv/audiofeatures.csv')
+bubble_trackinfo <- read.csv('csv/track_info.csv')
+bubble_artists <- read.csv('csv/artists.csv')
+
+
+
+bubble_data_track <- merge(x = bubble_data, y = bubble_trackinfo, by = "track_id", all.x = TRUE) %>%
+  select(-popularity.y) %>%
+  rename(popularity = popularity.x)
+
+bubble_artists$track_id <- bubble_artists$song_id
+bubble_data_final <- merge(x = bubble_artists, y = bubble_data_track, by = "track_id", all.x = TRUE)
+
+bubble_data_final$genre <- as.factor(bubble_data_final$genre)
+
+bubble_data <- bubble_data_final
+
+
+bubble_data <- bubble_data %>%
+  mutate(
+    key_type = case_when(
+      grepl("Major", key, ignore.case = TRUE) ~ "Major",
+      grepl("Minor", key, ignore.case = TRUE) ~ "Minor",
+      TRUE ~ "Unknown"
+    ),
+    key_type = factor(key_type, levels = c("Major", "Minor", "Unknown")),
+    duration_minutes = sapply(strsplit(duration, ":"), function(x) {
+      as.numeric(x[1]) + as.numeric(x[2]) / 60 + as.numeric(x[3]) / 3600
+    }),
+    duration_category = case_when(
+      duration_minutes >= 1 & duration_minutes < 2 ~ "1-2",
+      duration_minutes >= 2 & duration_minutes < 3 ~ "2-3",
+      duration_minutes >= 3 & duration_minutes < 4 ~ "3-4",
+      duration_minutes >= 4 ~ "4+"
+    ),
+    duration_category = factor(duration_category, levels = c("1-2", "2-3", "3-4", "4+"))
+  )
