@@ -4,7 +4,6 @@ library(ggplot2)
 library(dplyr)
 library(bslib)
 library(shinyBS)
-library (ggstream)
 library(GGally)
 library(viridis)
 
@@ -160,33 +159,8 @@ server <- function(input, output, session) {
       )
   })
   
-  # Idiom 3 Placeholder
-  
-  # # Load data
-  # features <- read.csv('csv/audiofeatures.csv')
-  # artists <- read.csv('csv/artists.csv')
-  # trackinfo<-read.csv('csv/track_info.csv')
-  # # Merge and process 
-  # artists$track_id<-artists$song_id
-  
-  # trackinfo<-merge(x = trackinfo, y = artists, by = "track_id", all.x = TRUE)
-  
-  # trackinfo<-merge(x = trackinfo, y = features, by = "track_id", all.x = TRUE)
-  
-  
-  # trackinfo$artist_song=paste(trackinfo$artist,'-',trackinfo$track_name)
-  
-  # cols_to_keep<-c('artist_song','genre','happiness','acousticness','danceability','energy','speechiness','instrumentalness','liveness')
-  # dataset<-trackinfo[,(names(trackinfo) %in% cols_to_keep)]
-  
-  # dataset$genre<-as.factor(dataset$genre)
-  
-
-  
-  # Reactive dataset filtered by genre and artist
-  # Reactive dataset based on filter type
-
-    # Reactive expression to filter data (same as before)
+  # Idiom 3
+    # Reactive expression to filter data
     par_coords_data <- reactive({
       if (input$filter_type == "genre") {
         req(input$genres)

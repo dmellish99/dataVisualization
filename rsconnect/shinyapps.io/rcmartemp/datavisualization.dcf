@@ -1,0 +1,10 @@
+name: datavisualization
+title:
+username: rcmartemp
+account: rcmartemp
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13685411
+bundleId: 9623955
+url: https://rcmartemp.shinyapps.io/datavisualization/
+version: 1

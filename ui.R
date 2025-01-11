@@ -142,20 +142,20 @@ ui <- fluidPage(
           sliderInput(
             "bpm_range",
             "Filter by BPM:",
-            min = min(data$BPM, na.rm = TRUE),
-            max = max(data$BPM, na.rm = TRUE),
-            value = c(min(data$BPM, na.rm = TRUE), max(data$BPM, na.rm = TRUE))
+            min = min(bubble_data$BPM, na.rm = TRUE),
+            max = max(bubble_data$BPM, na.rm = TRUE),
+            value = c(min(bubble_data$BPM, na.rm = TRUE), max(bubble_data$BPM, na.rm = TRUE))
           ),
           sliderInput(
             "energy_range",
             "Filter by Energy:",
-            min = min(data$energy, na.rm = TRUE),
-            max = max(data$energy, na.rm = TRUE),
-            value = c(min(data$energy, na.rm = TRUE), max(data$energy, na.rm = TRUE))
+            min = min(bubble_data$energy, na.rm = TRUE),
+            max = max(bubble_data$energy, na.rm = TRUE),
+            value = c(min(bubble_data$energy, na.rm = TRUE), max(bubble_data$energy, na.rm = TRUE))
           ),
           sliderInput("popularity_range", 
-            "Select Popularity Range", min = min(data$popularity),
-            max = max(data$popularity), value = c(min(data$popularity), max(data$popularity))
+            "Select Popularity Range", min = min(bubble_data$popularity),
+            max = max(bubble_data$popularity), value = c(min(bubble_data$popularity), max(bubble_data$popularity))
           ),
           selectInput(
             "color_by",
